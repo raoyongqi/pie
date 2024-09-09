@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMap District Search Example</title>
+  <!-- 高德地图 API -->
+  <script type="text/javascript" src="https://webapi.amap.com/maps?v=2.0&key=514c99148afec38a187b745ddbd1e517&AMap.DistrictSearch"></script>
+  <style>
+    html, body, #map {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    // 初始化地图
+    var map = new AMap.Map('map', {
+      zoom: 8,
+
+    });
+
+    // 加载 DistrictSearch 插件
+    AMap.plugin("AMap.DistrictSearch", function () {
+  var district = new AMap.DistrictSearch({
+    extensions: "all", //返回行政区边界坐标等具体信息
+    subdistict:0,
+  });
+  console.log(  district)
+  district.search("10001", function (status, result) {
+    console.log(result)
+    var bounds = result.districtList[0].boundaries; //获取朝阳区的边界信息
+    if (bounds) {
+      for (var i = 0; i < bounds.length; i++) {
+        //生成行政区划 polygon
+        var polygon = new AMap.Polygon({
+          map: map, //显示该覆盖物的地图对象
+          strokeWeight: 1, //轮廓线宽度
+          path: bounds[i], //多边形轮廓线的节点坐标数组
+          fillOpacity: 0.7, //多边形填充透明度
+          fillColor: "#CCF3FF", //多边形填充颜色
+          strokeColor: "#CC66CC", //线条颜色
+        });
+      }
+      map.setFitView(); //将覆盖物调整到合适视野
+    }
+  });
+});
+  </script>
+</body>
+</html>
