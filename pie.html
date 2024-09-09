@@ -151,10 +151,12 @@
       extensions: "all",
       subdistrict: 0,
     });
+    console.log(new AMap.DistrictSearch({
+        extensions: "all",
+        subdistrict: 0,
+      }).search())
+    districtSearch.search("河北省", function (status, result) {
 
-    districtSearch.search("北京市", function (status, result) {
-
-        provinceData = result.districtList[0].districtList;
         const outer = [
         new AMap.LngLat(-360, 90, true),
         new AMap.LngLat(-360, -90, true),
