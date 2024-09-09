@@ -6,7 +6,6 @@ export function setupAMap(chart, AMap) {
     if (amap) {
       amap.addControl(new AMap.Scale());
       amap.addControl(new AMap.ToolBar());
-  
       const districtSearch = new AMap.DistrictSearch({
         extensions: "all",
         subdistrict: 0,
@@ -56,6 +55,7 @@ export function setupAMap(chart, AMap) {
         });
   
         amap.add(polygon);
+
         // amap.add(new AMap.TileLayer.Satellite());
       });
     }
