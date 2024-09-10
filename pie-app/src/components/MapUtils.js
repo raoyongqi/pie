@@ -1,5 +1,5 @@
 // MapUtils.js
-export function setupAMap(chart, AMap) {
+export function setupAMap(chart, AMap,selectedCity) {
     const amapComponent = chart.getModel().getComponent('amap');
     const amap = amapComponent.getAMap();
   
@@ -9,9 +9,10 @@ export function setupAMap(chart, AMap) {
       const districtSearch = new AMap.DistrictSearch({
         extensions: "all",
         subdistrict: 0,
+        noCache: true, // 禁用缓存
       });
   
-      districtSearch.search("河北省", function (status, result) {
+      districtSearch.search(selectedCity.name, function (status, result) {
         const outer = [
           new AMap.LngLat(-360, 90, true),
           new AMap.LngLat(-360, -90, true),

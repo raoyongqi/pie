@@ -13,7 +13,9 @@ const MapChart = () => {
   const [satelliteVisible, setSatelliteVisible] = useState(false); // 状态控制卫星图层的显示
   const amapRef = useRef(null); // 用于保存 AMap 实例
   const [selectedCity, setSelectedCity] = useState(cities[0]);  
-
+  // const AMapRef = useRef(null); // 用于保存 AMap 实例
+  const chartInstanceRef = useRef(null); // 用于保存 ECharts 实例
+  
   useEffect(() => {
     if (!chartRef.current) return; // Check if chartRef.current exists
 
@@ -85,8 +87,10 @@ const MapChart = () => {
 
       chart.setOption(option);
 
-      setupAMap(chart, AMap); // 初始化 AMap 相关配置
+      setupAMap(chart, AMap,cities[0]); // 初始化 AMap 相关配置
+      // AMapRef.current = AMap
       amapRef.current = chart.getModel().getComponent('amap')?.getAMap();
+      chartInstanceRef.current = chart;
       return () => {
         chart.dispose();
       };
@@ -127,32 +131,36 @@ const MapChart = () => {
   useEffect(() => {
     if (amapRef.current && selectedCity) {
       amapRef.current.setCenter(selectedCity.center);
+      const polygons = amapRef.current.getAllOverlays();
+      // 移除所有 Polygon
+      polygons.forEach(polygon => {
+        amapRef.current.remove(polygon);
+      });
+      console.log(selectedCity.name)
+      setupAMap(chartInstanceRef.current, window.AMap,selectedCity)
     }
+
   }, [selectedCity]); 
 
   const handleCityChange = (e) => {
     const adcode = e.target.value;
     const city = cities.find(city => city.adcode === adcode);
-    if (city&& amapRef.current) {
+    if (city&& amapRef.current&&chartInstanceRef.current) {
       
 
       setSelectedCity(city);
+      // console.log(city)
+      // console.log(selectedCity)
+        
 
-        const polygons = amapRef.current.getAllOverlays();
-        console.log(polygons);
-        // 移除所有 Polygon
-        polygons.forEach(polygon => {
-          amapRef.current.remove(polygon);
-        });
-
-      
+  //
     }
   };
   
   return    (      
      
     <div >
-                  <select onChange={handleCityChange} value={selectedCity.adcode}>
+        <select onChange={handleCityChange} value={selectedCity.adcode}>
         {cities.map(city => (
           <option key={city.adcode} value={city.adcode}>
             {city.name}
