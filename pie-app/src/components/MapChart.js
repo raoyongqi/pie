@@ -4,18 +4,21 @@ import * as echarts from 'echarts';
 import 'echarts-extension-amap';
 import AMapLoader from '@amap/amap-jsapi-loader';
 import { setupAMap } from './MapUtils'; // 导入 AMap 配置函数
-import { data, geoCoords, pieDimensions } from './mapData'; // 引入数据和配置
-import cities from '../data/province.json';
+import { capitals} from '../data/site2.js'; // 引入数据和配置
+import cities from '../data/region_centers.json';
+import './styles.css'; // 或使用 CSS 模块 import styles from './ButtonStyles.module.css';
+import { createPieSeries } from './createPieSeries';
 
+import { globalMaxPLValue, filteredCapitals} from './dataUtils'; // 导入外部函数
 
 const MapChart = () => {
   const chartRef = useRef(null);
   const [satelliteVisible, setSatelliteVisible] = useState(false); // 状态控制卫星图层的显示
   const amapRef = useRef(null); // 用于保存 AMap 实例
   const [selectedCity, setSelectedCity] = useState(cities[0]);  
-  // const AMapRef = useRef(null); // 用于保存 AMap 实例
   const chartInstanceRef = useRef(null); // 用于保存 ECharts 实例
-  
+
+
   useEffect(() => {
     if (!chartRef.current) return; // Check if chartRef.current exists
 
@@ -36,41 +39,14 @@ const MapChart = () => {
     }).then(AMap => {
       const chart = echarts.init(chartRef.current);
 
-      const pieSeries = [];
-
-      echarts.util.each(data, (values, name) => {
-        pieSeries.push({
-          type: 'pie',
-          name: name,
-          coordinateSystem: 'amap',
-          center: geoCoords[name],
-          radius: 20,
-          data: echarts.util.map(values, (value, idx) => ({
-            name: pieDimensions[idx],
-            value: value
-          })),
-          label: {
-            show: false
-          },
-          emphasis: {
-            label: {
-              show: true
-            },
-            labelLine: {
-              show: true,
-              lineStyle: {
-                color: '#fff'
-              }
-            }
-          }
-        });
-      });
+    
+      const pieSeries = createPieSeries(filteredCapitals, globalMaxPLValue);
 
       const option = {
         amap: {
           viewMode: '3D',
-          center: [102.278269, 35.391011],
-          zoom: 8,
+          center: cities[0].center,
+          zoom: 7,
           resizeEnable: true,
           mapStyle: 'amap://styles/dark',
           renderOnMoving: true,
@@ -88,8 +64,7 @@ const MapChart = () => {
       chart.setOption(option);
 
       setupAMap(chart, AMap,cities[0]); // 初始化 AMap 相关配置
-      // AMapRef.current = AMap
-      amapRef.current = chart.getModel().getComponent('amap')?.getAMap();
+        amapRef.current = chart.getModel().getComponent('amap')?.getAMap();
       chartInstanceRef.current = chart;
       return () => {
         chart.dispose();
@@ -119,25 +94,30 @@ const MapChart = () => {
     }
   }, [satelliteVisible]);
 
+  
   useEffect(() => {
-    // 更新卫星图层的可见性
-    if (satelliteVisible) {
-      addSatelliteLayer();
-    } else {
-      removeSatelliteLayer();
-    }
-  }, [satelliteVisible]);
+    if (amapRef.current && selectedCity && chartInstanceRef.current) {
 
-  useEffect(() => {
-    if (amapRef.current && selectedCity) {
-      amapRef.current.setCenter(selectedCity.center);
-      const polygons = amapRef.current.getAllOverlays();
-      // 移除所有 Polygon
-      polygons.forEach(polygon => {
-        amapRef.current.remove(polygon);
+      const filteredCapitals = capitals.filter(capital => {
+        // 检查是否匹配 province, city 或 district
+        return capital.province ===selectedCity.name || 
+               capital.city ===selectedCity.name || 
+               capital.district ===selectedCity.name;
       });
-      console.log(selectedCity.name)
-      setupAMap(chartInstanceRef.current, window.AMap,selectedCity)
+      const currentOption = chartInstanceRef.current.getOption();
+      
+      const pieSeries = createPieSeries(filteredCapitals, globalMaxPLValue);
+      const updatedOption = {
+        ...currentOption,
+        center: selectedCity.center,
+        series: pieSeries // 仅更新数据系列
+      };
+      console.log(updatedOption)
+      chartInstanceRef.current.setOption(updatedOption, true);
+
+      setupAMap(chartInstanceRef.current, window.AMap,selectedCity); // 初始化 AMap 相关配置
+      
+      amapRef.current = chartInstanceRef.current.getModel().getComponent('amap')?.getAMap();
     }
 
   }, [selectedCity]); 
@@ -145,33 +125,28 @@ const MapChart = () => {
   const handleCityChange = (e) => {
     const adcode = e.target.value;
     const city = cities.find(city => city.adcode === adcode);
-    if (city&& amapRef.current&&chartInstanceRef.current) {
-      
-
+    if (city && amapRef.current && chartInstanceRef.current) {
       setSelectedCity(city);
-      // console.log(city)
-      // console.log(selectedCity)
-        
-
-  //
     }
   };
   
-  return    (      
-     
-    <div >
-        <select onChange={handleCityChange} value={selectedCity.adcode}>
+  return (
+    <div>
+      <select className="custom-select" onChange={handleCityChange} value={selectedCity.adcode}>
         {cities.map(city => (
           <option key={city.adcode} value={city.adcode}>
             {city.name}
           </option>
         ))}
       </select>
-      <button className="toggleButton" onClick={() => setSatelliteVisible(!satelliteVisible)}>
-  {satelliteVisible ? 'Hide Satellite Layer' : 'Show Satellite Layer'}
-</button>
-<div ref={chartRef} style={{ width: '100%', height: '100vh'}}></div>;      </div>
-  )
+      <button
+        className={`toggleButton ${satelliteVisible ? 'button-red' : 'button-blue'}`}
+        onClick={() => setSatelliteVisible(!satelliteVisible)}
+      >
+        {satelliteVisible ? 'Hide Satellite Layer' : 'Show Satellite Layer'}
+      </button>
+      <div ref={chartRef} style={{ width: '100%', height: '100vh' }}></div>
+    </div>
+  );
 };
-
 export default MapChart;

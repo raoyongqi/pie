@@ -1,0 +1,31 @@
+/* styles.css 或 ButtonStyles.module.css */
+
+.toggleButton {
+    padding: 10px 20px; /* 增大按钮 */
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 5px;
+  }
+  
+  .button-red {
+    background-color: red;
+  }
+  
+  .button-blue {
+    background-color: blue;
+  }
+/* styles.css 或 SelectStyles.module.css */
+
+.custom-select {
+    padding: 10px; /* 增大内边距 */
+    font-size: 16px; /* 增大字体 */
+    border-radius: 5px; /* 圆角边框 */
+    border: 1px solid #ccc; /* 边框颜色 */
+    width: 200px; /* 调整宽度 */
+    height: 40px; /* 调整高度 */
+    box-sizing: border-box; /* 包括内边距和边框 */
+  }
+  

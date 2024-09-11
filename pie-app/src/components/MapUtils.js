@@ -4,8 +4,7 @@ export function setupAMap(chart, AMap,selectedCity) {
     const amap = amapComponent.getAMap();
   
     if (amap) {
-      amap.addControl(new AMap.Scale());
-      amap.addControl(new AMap.ToolBar());
+
       const districtSearch = new AMap.DistrictSearch({
         extensions: "all",
         subdistrict: 0,
@@ -56,7 +55,9 @@ export function setupAMap(chart, AMap,selectedCity) {
         });
   
         amap.add(polygon);
-
+        amap.setCenter(selectedCity.center);
+        amap.addControl(new AMap.Scale());
+        amap.addControl(new AMap.ToolBar());
         // amap.add(new AMap.TileLayer.Satellite());
       });
     }
