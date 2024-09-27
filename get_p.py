@@ -52,16 +52,20 @@ def plot_and_save_bar_chart(data, title, filename):
 
     plt.figure(figsize=(10, 6))
     plt.barh(labels, values, color='skyblue')
-    plt.xlabel('Count')
-    plt.ylabel('Category')
-    plt.title(title)
+    
+    # 调整 x 和 y 轴标签的字体大小
+    plt.xlabel('Count', fontsize=22)  # 设置 x 轴标签字体大小
+    plt.ylabel('Category', fontsize=22)  # 设置 y 轴标签字体大小
+    plt.title(title, fontsize=24)  # 也可以设置标题的字体大小
+        # 调整刻度标签的字体大小
+    plt.xticks(fontsize=16)  # 设置 x 轴刻度标签的字体大小
+    plt.yticks(fontsize=16)  # 设置 y 轴刻度标签的字体大小
     plt.gca().invert_yaxis()  # 将最高的值放在顶部
     plt.tight_layout()
 
     # 保存图片
-    plt.savefig('data/' +filename)
+    plt.savefig('data/' + filename)
     plt.close()
-
 # 读取文件并进行处理
 file_path = 'pie-app/src/data/site2.js'  # 替换为你的 JavaScript 文件路径
 capitals_data = read_js_file(file_path)
